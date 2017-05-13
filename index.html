@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<canvas id=canvasEl width=400 height=400 style="width: 200px; height: 200px;"></canvas>
+<script id="vShaderEl" type="x-shader">
+
+attribute vec2 aVertexPosition;
+
+void main() {
+  gl_Position = vec4(aVertexPosition, 0.0, 1.0);
+}
+
+</script>
+
+<script id="fShaderEl" type="x-shader">
+
+void main(void) {
+  gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);
+}
+
+</script>
+<script>
+
+const gl = canvasEl.getContext('webgl');
+
+gl.clearColor(1, 0, 1, 1);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+const squareVertices = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, squareVertices);
+  
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  1.0,  1.0,  0.0, -1.0, 1.0,  0.0,
+  1.0,  -1.0, 0.0, -1.0, -1.0, 0.0
+]), gl.STATIC_DRAW);
+
+const vShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vShader, vShaderEl.text);
+gl.compileShader(vShader);
+
+const fShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fShader, fShaderEl.text);
+gl.compileShader(fShader);
+
+const program = gl.createProgram();
+gl.attachShader(program, vShader);
+gl.attachShader(program, fShader);
+gl.linkProgram(program);
+
+gl.useProgram(program);
+
+const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
+gl.enableVertexAttribArray(aVertexPosition);
+gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+
+gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+</script>
