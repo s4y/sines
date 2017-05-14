@@ -21,16 +21,19 @@ body {
 </style>
 <canvas id=canvasEl></canvas>
 <script id="vShaderEl" type="x-shader">
-
 attribute vec2 aVertexPosition;
+varying vec2 pos;
 
 void main() {
+	pos = (aVertexPosition + 1.0) / 2.0;
 	gl_Position = vec4(aVertexPosition, 0.0, 1.0);
 }
 
 </script>
 <script id="fShaderEl" type="x-shader">
 precision mediump float;
+
+varying vec2 pos;
 uniform float PI;
 uniform float time;
 
@@ -39,42 +42,32 @@ float square(float x) {
 }
 
 void main(void) {
-	vec2 c = gl_FragCoord.xy;
-	float rgb = 0.5 + sin(time*0.02)/2.0
-										//+ sin(2.0*PI*50.0*c.x+time*0.03)/2.0
-										//+ sin(2.0*PI*80.0*c.y+time*0.02)/2.0
-										//+ sin(2.0*PI*.005*sqrt(square(c.x)+square(c.y))+time*0.1)
-										//+ sin(2.0*PI*.005*sqrt(square(c.x)+square(c.y))+time*0.1)
-										//+ sin(2.0*PI*.005*sqrt(square(resolution.x-c.x)+square(c.y))+time*0.1)
-										//+ sin(2.0*PI*.005*sqrt(square(resolution.x*2.0-c.x)+square(c.y))+time*0.1)
-										//+ sin(2.0*PI*5.0*sqrt(
-										//	square(c.x) +
-										//	square(c.y)
-										//)-time*0.1)
-										//+ sin(2.0*PI*5.0*sqrt(
-										//	square(1.0 - c.x) +
-										//	square(c.y)
-										//)+time*0.1)
-										+ sin(2.0*PI*10.0*sqrt(
-											square(c.x) +
-											square(1.0 - c.y)
-										)-time*0.01)
-										+ sin(2.0*PI*10.0*sqrt(
-											square(1.0 - c.x) +
-											square(c.y)
-										)-time*0.01)
-										//+ sin(2.0*PI*20.0*sqrt(
-										//	square(((cos(time / 70.0) + 1.0) / 2.0) - c.x) +
-										//	square(((sin(time / 100.0) + 1.0) / 2.0) - c.y)
-										//)+time*0.1)
-										//+ sin(2.0*PI*20.0*sqrt(square(0.6 - c.x)+square(c.y))-time*0.1)
-										//+ sin(2.0*PI*100.0*sqrt(square(resolution.x*2.0-x)+square(y))-time*0.1);
-									;
-	gl_FragColor = vec4(
-			rgb * sin(time * 0.03),
-			rgb * cos(time * 0.05),
-			rgb * sin(time * 0.11),
-		1.0);
+	// vec2 sc = gl_FragCoord.xy / bounds;
+	// vec2 c = gl_FragCoord.xy / bounds.x;
+	float rgb = (0.0 + sin(pos.x * 20.0)
+        // + 0.5 + sin(2.0*PI*0.01*sqrt(
+        //     square(pos.x * 1000.0) +
+        //     square(pos.y * 1000.0)
+        //     //square(c.y * 10000.0)
+        // ) - time * 20.0) / 2.0
+        // + 0.5 + sin(2.0*PI*0.01*sqrt(
+        //     square((1.0 - pos.x) * 1000.0) +
+        //     square((1.0 - pos.y) * 1000.0)
+        //     //square(c.y * 10000.0)
+        // ) - time * 20.0) / 2.0
+        // + 0.5 + sin(2.0*PI*0.01*sqrt(
+        //     square((c.x - 1.0) * 10000.0) +
+        //     square(c.y * 10000.0)
+        // ) - time * 8.0) / 2.0
+    );
+
+	gl_FragColor = vec4(mod(rgb, 1.0), rgb, rgb, 1.0);
+
+	// gl_FragColor = vec4(
+    //     rgb * sin(time * 0.3),
+    //     rgb * cos(time * 0.5),
+    //     rgb * sin(time * 1.1),
+    // 1.0);
 }
 
 </script>
@@ -111,16 +104,29 @@ const timeLoc = gl.getUniformLocation(program, 'time');
 const piLoc = gl.getUniformLocation(program, 'PI');
 gl.uniform1f(piLoc, Math.PI);
 
+const boundsLoc = gl.getUniformLocation(program, 'bounds');
+
 const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
 gl.enableVertexAttribArray(aVertexPosition);
 gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
 
+function resize() {
+    canvasEl.width = canvasEl.clientWidth * devicePixelRatio;
+    canvasEl.height = canvasEl.clientHeight * devicePixelRatio;
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.uniform2f(boundsLoc, gl.drawingBufferWidth, gl.drawingBufferHeight);
+}
+
+window.addEventListener('resize', resize);
+resize();
+
 function draw(now) {
-	gl.uniform1f(timeLoc, now);
+	gl.uniform1f(timeLoc, now / 1000);
 	gl.drawArrays(gl.TRIANGLES, 0, 6);
 	requestAnimationFrame(draw);
 }
 
 requestAnimationFrame(draw);
+
 
 </script>
