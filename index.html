@@ -42,32 +42,23 @@ float square(float x) {
 }
 
 void main(void) {
-	// vec2 sc = gl_FragCoord.xy / bounds;
-	// vec2 c = gl_FragCoord.xy / bounds.x;
-	float rgb = (0.0 + sin(pos.x * 20.0)
-        // + 0.5 + sin(2.0*PI*0.01*sqrt(
-        //     square(pos.x * 1000.0) +
-        //     square(pos.y * 1000.0)
-        //     //square(c.y * 10000.0)
-        // ) - time * 20.0) / 2.0
-        // + 0.5 + sin(2.0*PI*0.01*sqrt(
-        //     square((1.0 - pos.x) * 1000.0) +
-        //     square((1.0 - pos.y) * 1000.0)
-        //     //square(c.y * 10000.0)
-        // ) - time * 20.0) / 2.0
-        // + 0.5 + sin(2.0*PI*0.01*sqrt(
-        //     square((c.x - 1.0) * 10000.0) +
-        //     square(c.y * 10000.0)
-        // ) - time * 8.0) / 2.0
-    );
+	float brightness = sin(pos.x * 20.0)
+        + 0.5 + sin(2.0*PI*0.01*sqrt(
+            square((1.0 - pos.x) * 1000.0) +
+            square((1.0 - pos.y) * 1000.0)
+        ) - time * 10.0) / 2.0
+        + 0.5 + sin(2.0*PI*0.01*sqrt(
+            square((pos.x - 1.0) * 1000.0) +
+            square(pos.y * 1000.0)
+        ) - time * 10.0) / 2.0
+    ;
 
-	gl_FragColor = vec4(mod(rgb, 1.0), rgb, rgb, 1.0);
-
-	// gl_FragColor = vec4(
-    //     rgb * sin(time * 0.3),
-    //     rgb * cos(time * 0.5),
-    //     rgb * sin(time * 1.1),
-    // 1.0);
+	gl_FragColor = vec4(
+		mod(brightness, 1.0),
+		brightness,
+		brightness,
+		1.0
+	);
 }
 
 </script>
@@ -127,6 +118,5 @@ function draw(now) {
 }
 
 requestAnimationFrame(draw);
-
 
 </script>
