@@ -29,7 +29,7 @@ uniform float time;
 varying vec2 pos;
 
 void main() {
-	pos = (p + 1.0) / 2.0;
+	pos = p;
 
 	float x = p.x;
 	float y = p.y;
@@ -74,7 +74,7 @@ uniform float time;
 varying vec2 pos;
 
 void main(void) {
-	float brightness = sin(pos.x * 20.0)
+	float brightness = cos(pos.x * PI * 3.0 + PI)
         + 0.5 + sin(2.0*PI*0.01*sqrt(
             pow((1.0 - pos.x) * 1000.0, 2.0) +
             pow((1.0 - pos.y) * 1000.0, 2.0)
