@@ -21,35 +21,64 @@ body {
 </style>
 <canvas id=canvasEl></canvas>
 <script id="vShaderEl" type="x-shader">
-attribute vec2 aVertexPosition;
+attribute vec2 p;
+
+uniform float PI;
+uniform float aspect;
+uniform float time;
 varying vec2 pos;
 
+const float hypo = sqrt(2.0);
+
 void main() {
-	pos = (aVertexPosition + 1.0) / 2.0;
-	gl_Position = vec4(aVertexPosition, 0.0, 1.0);
+	float x = p.x;
+	float y = p.y;
+	float z = pow(p.x, 2.0);
+
+	pos = (p + 1.0) / 2.0;
+
+	float rotation = sin(time * 2.0) / 2.0;
+
+	mat3 transform = mat3(
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0
+	);
+	
+	transform *= mat3(
+		min(1.0, 1.0 / aspect), 0.0, 0.0,
+		0.0, min(1.0, aspect), 0.0,
+		0.0, 0.0, 0.0
+	);
+
+	transform *= mat3(
+		cos(rotation), -sin(rotation), 0.0,
+		sin(rotation), cos(rotation), 0.0,
+		0.0, 0.0, 0.0
+	);
+
+	gl_Position = vec4(
+		transform * vec3(x, y, z * (1.0 + z * 0.6)),
+	1.0 + z * 0.6);
 }
 
 </script>
 <script id="fShaderEl" type="x-shader">
-precision mediump float;
+precision highp float;
 
-varying vec2 pos;
 uniform float PI;
 uniform float time;
-
-float square(float x) {
-    return x * x;
-}
+varying vec2 pos;
 
 void main(void) {
 	float brightness = sin(pos.x * 20.0)
         + 0.5 + sin(2.0*PI*0.01*sqrt(
-            square((1.0 - pos.x) * 1000.0) +
-            square((1.0 - pos.y) * 1000.0)
+            pow((1.0 - pos.x) * 1000.0, 2.0) +
+            pow((1.0 - pos.y) * 1000.0, 2.0)
         ) - time * 10.0) / 2.0
         + 0.5 + sin(2.0*PI*0.01*sqrt(
-            square((pos.x - 1.0) * 1000.0) +
-            square(pos.y * 1000.0)
+            pow((pos.x - 1.0) * 1000.0, 2.0) +
+            pow(pos.y * 1000.0, 2.0)
         ) - time * 10.0) / 2.0
     ;
 
@@ -69,10 +98,9 @@ const gl = canvasEl.getContext('webgl');
 
 const squareVertices = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, squareVertices);
-	
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-	1.0, 1.0, -1.0, 1.0, 1.0, -1.0,
-	1.0, -1.0, -1.0, -1.0, -1.0, 1.0
+	0.0, 1.0, 0.0, -1.0, 1.0, 0.0,
+	0.0, 1.0, 0.0, -1.0, -1.0, 0.0,
 ]), gl.STATIC_DRAW);
 
 const vShader = gl.createShader(gl.VERTEX_SHADER);
@@ -90,22 +118,21 @@ gl.linkProgram(program);
 
 gl.useProgram(program);
 
-const timeLoc = gl.getUniformLocation(program, 'time');
-
 const piLoc = gl.getUniformLocation(program, 'PI');
 gl.uniform1f(piLoc, Math.PI);
 
-const boundsLoc = gl.getUniformLocation(program, 'bounds');
+const timeLoc = gl.getUniformLocation(program, 'time');
+const aspectLoc = gl.getUniformLocation(program, 'aspect');
 
-const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
+const aVertexPosition = gl.getAttribLocation(program, 'p');
 gl.enableVertexAttribArray(aVertexPosition);
 gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
 
 function resize() {
     canvasEl.width = canvasEl.clientWidth * devicePixelRatio;
     canvasEl.height = canvasEl.clientHeight * devicePixelRatio;
+	gl.uniform1f(aspectLoc, gl.drawingBufferWidth / gl.drawingBufferHeight);
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.uniform2f(boundsLoc, gl.drawingBufferWidth, gl.drawingBufferHeight);
 }
 
 window.addEventListener('resize', resize);
