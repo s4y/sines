@@ -28,14 +28,12 @@ uniform float aspect;
 uniform float time;
 varying vec2 pos;
 
-const float hypo = sqrt(2.0);
-
 void main() {
+	pos = (p + 1.0) / 2.0;
+
 	float x = p.x;
 	float y = p.y;
-	float z = pow(p.x, 2.0);
-
-	pos = (p + 1.0) / 2.0;
+	float z = sqrt(pow(p.x, 2.0) + pow(p.y, 2.0));
 
 	float rotation = sin(time * 2.0) / 2.0;
 
@@ -45,6 +43,12 @@ void main() {
 		0.0, 0.0, 1.0
 	);
 	
+	transform *= mat3(
+		1.0 / (z * 0.6), 0.0, 0.0,
+		0.0, 1.0 / (z * 0.6), 0.0,
+		0.0, 0.0, 1.0
+	);
+
 	transform *= mat3(
 		min(1.0, 1.0 / aspect), 0.0, 0.0,
 		0.0, min(1.0, aspect), 0.0,
@@ -58,8 +62,7 @@ void main() {
 	);
 
 	gl_Position = vec4(
-		transform * vec3(x, y, z * (1.0 + z * 0.6)),
-	1.0 + z * 0.6);
+		transform * vec3(x, y, z), 1.0 + z * 0.6);
 }
 
 </script>
@@ -99,8 +102,10 @@ const gl = canvasEl.getContext('webgl');
 const squareVertices = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, squareVertices);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-	0.0, 1.0, 0.0, -1.0, 1.0, 0.0,
-	0.0, 1.0, 0.0, -1.0, -1.0, 0.0,
+	0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, -1.0, 1.0, 0.0,
+	0.0, 1.0, 0.0, 0.0, -1.0, 0.0,
+	0.0, 0.0, 0.0, -1.0, -1.0, 0.0,
 ]), gl.STATIC_DRAW);
 
 const vShader = gl.createShader(gl.VERTEX_SHADER);
@@ -140,7 +145,7 @@ resize();
 
 function draw(now) {
 	gl.uniform1f(timeLoc, now / 1000);
-	gl.drawArrays(gl.TRIANGLES, 0, 6);
+	gl.drawArrays(gl.TRIANGLES, 0, 12);
 	requestAnimationFrame(draw);
 }
 
