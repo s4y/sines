@@ -67,26 +67,28 @@ mat3 rotZ(float angle) {
 	);
 }
 
+mat4 perspectiveProj(float fov, float aspect, float near, float far) {
+	float f = 1.0 / tan(fov/2.0);
+	return mat4(
+		f / aspect, 0.0, 0.0, 0.0,
+		0.0, f, 0.0, 0.0,
+		0.0, 0.0, (far + near) / (far - near), 1.0,
+		0.0, 0.0, (2.0 * far * near) / (near - far), 0.0
+	);
+}
+
 void main() {
 	pos = rotX(PI/4.0) * rotZ(PI/4.0) * p;
 
 	mat3 transform = kIdentityTransform;
-	transform *= scale(
-		min(1.0, 1.0 / aspect),
-		min(1.0, aspect),
-		min(1.0 / aspect, aspect)
-	);
-
 	transform *= rotX(time);
 	transform *= rotZ(time);
 
 	apos = transform * p;
-	vec4 tpos = vec4(apos, 1.0);
-
-	float dist = tpos.z * 0.4 + 0.5; //distance(tpos.xyz, vec3(0.0, 0.0, -1.0));
-	tpos.xy /= dist * 2.0 + 1.0;
-	tpos.z *= 0.5;
-
+	apos.z += 4.0;
+	vec4 tpos = perspectiveProj(
+		PI/3.0, aspect, 0.1, 10.0
+	) * vec4(apos, 1.0);
 	gl_Position = tpos;
 }
 
@@ -111,13 +113,11 @@ void main(void) {
         ) - time * 10.0) / 2.0
     ;
 
-	float alpha = 1.0; //min(1.0, (-apos.z / 2.0));
-
 	gl_FragColor = vec4(
-		mod(brightness, 1.0) * alpha,
-		brightness * alpha,
-		brightness * alpha,
-		alpha
+		mod(brightness, 1.0),
+		brightness,
+		brightness,
+		1.0
 	);
 }
 
