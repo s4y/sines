@@ -103,15 +103,15 @@ varying vec3 apos;
 
 void main(void) {
 	float brightness = cos(time + pos.x * PI * 3.0 + PI) / 4.0
-        + 0.5 + sin(2.0*PI*0.01*sqrt(
-            pow((1.0 - pos.x) * 1000.0, 2.0) +
-            pow((1.0 - pos.y) * 1000.0, 2.0)
-        ) - time * 10.0) / 2.0
-        + 0.5 + sin(2.0*PI*0.01*sqrt(
-            pow((pos.x - 1.0) * 1000.0, 2.0) +
-            pow(pos.y * 1000.0, 2.0)
-        ) - time * 10.0) / 2.0
-    ;
+				+ 0.5 + sin(2.0*PI*0.01*sqrt(
+						pow((1.0 - pos.x) * 1000.0, 2.0) +
+						pow((1.0 - pos.y) * 1000.0, 2.0)
+				) - time * 10.0) / 2.0
+				+ 0.5 + sin(2.0*PI*0.01*sqrt(
+						pow((pos.x - 1.0) * 1000.0, 2.0) +
+						pow(pos.y * 1000.0, 2.0)
+				) - time * 10.0) / 2.0
+		;
 
 	gl_FragColor = vec4(
 		mod(brightness, 1.0),
@@ -187,10 +187,10 @@ gl.enableVertexAttribArray(pLoc);
 gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0);
 
 function resize() {
-    canvasEl.width = canvasEl.clientWidth * devicePixelRatio;
-    canvasEl.height = canvasEl.clientHeight * devicePixelRatio;
+		canvasEl.width = canvasEl.clientWidth * devicePixelRatio;
+		canvasEl.height = canvasEl.clientHeight * devicePixelRatio;
 	gl.uniform1f(aspectLoc, gl.drawingBufferWidth / gl.drawingBufferHeight);
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+		gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 }
 
 window.addEventListener('resize', resize);
